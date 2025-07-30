@@ -1,0 +1,13 @@
+names: ['fish', 'jellyfish', 'penguin', 'puffin', 'shark', 'starfish', 'stingray', 'ballena', 'delfin', 'foca_leopardo', 'gaviota', 'orca', 'petrel', 'mantaraya', 'tiburon', 'Humano', 'foca', 'pezDorado Enano']
+nc: 18
+roboflow:
+  license: CC BY 4.0
+  project: aquarium-fpddz
+  url: https://universe.roboflow.com/floatingark/aquarium-fpddz/dataset/1
+  version: 1
+  workspace: floatingark
+test: ../test/images
+train: ../train/images
+val: ../valid/images
+
+## ballena, delfin, foca_leopardo, gaviota, orca, petrel, mantaraya, tiburon

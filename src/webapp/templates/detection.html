@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detección de Fauna Marina - Floating Ark</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        canvas, img {
+            border: 1px solid black;
+            max-width: 100%;
+        }
+        #stream {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Detección de Fauna Marina</h1>
+        <p>Sube una imagen, video o URL de YouTube para detectar animales marinos</p>
+    </header>
+    <nav>
+        <a href="/">Inicio</a>
+        <a href="/map">Mapa Interactivo</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/recommendations">Recomendaciones</a>
+        <a href="/segmentation">Segmentación</a>
+    </nav>
+    <section>
+        <h2>Subir Imagen, Video o URL de Imagen</h2>
+        <form id="upload-form" enctype="multipart/form-data" method="POST">
+            <input type="file" name="file" accept="image/*,video/mp4">
+            <button type="submit">Detectar</button>
+        </form>
+
+        <h2>Detectar desde URL de Imagen</h2>
+        <form id="image-url-form" onsubmit="submitImageUrlForm(event)">
+            <input type="text" name="image_url" placeholder="URL de Imagen" required>
+            <button type="submit">Detectar</button>
+        </form>
+
+        <h2>Detectar desde YouTube (Procesamiento Completo)</h2>
+        <form id="youtube-form" onsubmit="submitYouTubeForm(event)">
+            <input type="text" name="youtube_url" placeholder="URL de YouTube" required>
+            <button type="submit">Detectar</button>
+        </form>
+
+        <h2>Detectar Video •YT• (Tiempo Real)</h2>
+        <form id="youtube-iframe-form" onsubmit="loadVideo(event)">
+        <input type="text" id="youtube-iframe-url" name="youtube_url" placeholder="URL de YouTube" required>
+        <button onclick="loadVideo()">Cargar Video</button>
+        <button onclick="startDetection()" id="detect-iframe-btn" disabled>Detectar</button>
+        </form>
+        <br><br>
+        <iframe id="youtube-iframe" width="560" height="315" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div id="detection-results"></div>
+
+        <div id="detection-results"></div>
+        <h2>Streaming en Tiempo Real</h2>
+        <button id="startStream">Iniciar Streaming</button>
+        <div id="stream">
+            <img id="streamFrame" src="" alt="Streaming">
+        </div>
+        <button id="stopStream">Detener Streaming</button>
+
+        {% if detections %}
+        {% if alert %}
+            <div class="alert">¡Alerta! Se han detectado ballenas u orcas cerca del sistema flotante.</div>
+        {% endif %}
+        <h2>Resultados de Detección (Imagen)</h2>
+        <canvas id="canvas"></canvas>
+        <table>
+            <tr>
+                <th>Etiqueta</th>
+                <th>Confianza</th>
+            </tr>
+            {% for detection in detections %}
+            <tr>
+                <td>{{ detection.label }}</td>
+                <td>{{ detection.score|round(2) }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if frames %}
+        {% if alert %}
+            <div class="alert">¡Alerta! Se han detectado ballenas u orcas cerca del sistema flotante.</div>
+        {% endif %}
+        <h2>Resultados de Detección (Video)</h2>
+        <div class="gallery">
+            {% for frame in frames %}
+            <img src="data:image/png;base64,{{ frame }}" alt="Frame" style="width: 300px; margin: 10px;">
+            {% endfor %}
+        </div>
+        {% if distances %}
+        <h3>Distancias Estimadas</h3>
+        <ul>
+            {% for distance in distances %}
+            <li>Distancia: {{ distance|round(2) }} m</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+    </section>
+    <footer>
+        <p>© 2025 Floating Ark. Todos los derechos reservados.</p>
+    </footer>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    function submitImageUrlForm(event) {
+        event.preventDefault();
+        const form = event.target;
+        const imageUrl = form.querySelector('input[name="image_url"]').value;
+        const formData = new FormData();
+        formData.append('image_url', imageUrl);
+        fetch('/detect', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.body.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la imagen');
+        });
+    }
+
+    function submitYouTubeForm(event) {
+        event.preventDefault();
+        const form = event.target;
+        const youtubeUrl = form.querySelector('input[name="youtube_url"]').value;
+        fetch('/detect_youtube', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ youtube_url: youtubeUrl })
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.body.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar el video de YouTube');
+        });
+    }
+
+    function loadVideo(event) {
+        event.preventDefault();
+        const form = event.target;
+        const youtubeUrl = form.querySelector('input[name="youtube_url"]').value;
+        fetch('/detect_youtube_iframe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ youtube_url: youtubeUrl })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const videoId = new URLSearchParams(new URL(data.youtube_url).search).get('v');
+            if (videoId) {
+                document.getElementById('youtube-iframe').src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+                document.getElementById('detect-iframe-btn').disabled = false;
+            } else {
+                alert('URL de YouTube inválida');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar el video de YouTube');
+        });
+    }
+
+    function startDetection() {
+        const iframe = document.getElementById('youtube-iframe');
+        const player = new YT.Player(iframe, {
+            events: {
+                'onReady': onPlayerReady
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        const player = event.target;
+        player.playVideo();
+        setInterval(() => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 640;  // Ajustar según resolución promedio
+            canvas.height = 360;
+            const context = canvas.getContext('2d');
+            context.drawImage(player.getIframe(), 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
+            fetch('/detect_frame', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsDiv = document.getElementById('detection-results');
+                let table = '<h3>Resultados de Detección (Tiempo Real)</h3>';
+                table += '<table><tr><th>Etiqueta</th><th>Confianza</th><th>Distancia (m)</th></tr>';
+                data.forEach(detection => {
+                    table += `<tr><td>${detection.label}</td><td>${detection.score.toFixed(2)}</td><td>${detection.distance.toFixed(2)}</td></tr>`;
+                });
+                table += '</table>';
+                resultsDiv.innerHTML = table;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }, 1000); // Cada segundo
+    }
+
+    // Streaming con Socket.IO
+    const socket = io();
+    document.getElementById('startStream').addEventListener('click', () => {
+        socket.emit('start_stream');
+        document.getElementById('stream').style.display = 'block';
+    });
+    socket.on('stream_frame', (data) => {
+        document.getElementById('streamFrame').src = 'data:image/jpeg;base64,' + data.frame;
+    });
+    document.getElementById('stopStream').addEventListener('click', () => {
+        socket.emit('stop_stream');
+        document.getElementById('stream').style.display = 'none';
+    });
+
+    // Dibujar detecciones en canvas para imágenes subidas
+    {% if detections %}
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = "data:image/png;base64,{{ image_data }}";
+    img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        {% for detection in detections %}
+        ctx.beginPath();
+        ctx.rect({{ detection.box[0] }}, {{ detection.box[1] }},
+                {{ detection.box[2] - detection.box[0] }}, {{ detection.box[3] - detection.box[1] }});
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = 'red';
+        ctx.font = '16px Arial';
+        ctx.fillText('{{ detection.label }}: {{ detection.score|round(2) }}',
+                    {{ detection.box[0] }}, {{ detection.box[1] - 10 }});
+        {% endfor %}
+    };
+    {% endif %}
+</script>
+</body>
+</html>

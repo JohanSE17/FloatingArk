@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Segmentación del Mar - Floating Ark</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Segmentación del Mar</h1>
+        <p>Análisis de zonas de impacto para el sistema flotante</p>
+    </header>
+    <nav>
+        <a href="/">Inicio</a>
+        <a href="/map">Mapa Interactivo</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/recommendations">Recomendaciones</a>
+    </nav>
+    <section>
+        <h2>Clasificación de Regiones</h2>
+        <table>
+    <tr>
+        <th>Región</th>
+        <th>Altura Media de Ola (m)</th>
+        <th>Presencia de Fauna</th>
+        <th>Riesgo de Inundación</th>
+        <th>Clasificación</th>
+        <th>Uso Recomendado</th>
+        <th>Caso de Uso</th>
+        <th>Viabilidad Hidráulica (Pueblos SMART)</th>
+        <th>Viabilidad Hidráulica (Recolección)</th>
+    </tr>
+    {% for row in segmentation_data %}
+    <tr>
+        <td>{{ row['Región'] }}</td>
+        <td>{{ row['Altura Media de Ola (m)'] }}</td>
+        <td>{{ row['Presencia de Fauna'] }}</td>
+        <td>{{ row['Riesgo de Inundación'] }}</td>
+        <td>{{ row['Clasificación'] }}</td>
+        <td>{{ row['Uso Recomendado'] }}</td>
+        <td>{{ row['Caso de Uso'] or '' }}</td>
+        <td>{{ row['Viabilidad Hidráulica (Pueblos SMART)'] }}</td>
+        <td>{{ row['Viabilidad Hidráulica (Recolección)'] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+        <h2>Gráfico de Segmentación</h2>
+        <div id="segmentation-chart"></div>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+    var graph = {{ graph_json | safe }};
+    Plotly.newPlot('segmentation-chart', graph.data, graph.layout);
+</script>
+    </section>
+    <footer>
+        <p>© 2025 Floating Ark. Todos los derechos reservados.</p>
+    </footer>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

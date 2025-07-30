@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Floating Ark</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .chart-container { width: 100%; height: 400px; }
+        nav a { margin: 0 10px; text-decoration: none; color: #333; }
+        nav a:hover { color: #007bff; }
+        table { border-collapse: collapse; width: 50%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .gallery { display: flex; flex-wrap: wrap; justify-content: center; }
+        .gallery img { margin: 10px; max-width: 300px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dashboard de Análisis</h1>
+        <p>Visualizaciones y estadísticas del proyecto Floating Ark</p>
+    </header>
+    <nav>
+    <a href="/">Inicio</a>
+    <a href="/map">Mapa Interactivo</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/recommendations">Recomendaciones</a>
+    <a href="/segmentation">Segmentación</a>
+    <a href="/detect">Detección</a>
+    <a href="/simulation/choco">Simulación Colombia </a>
+    <a href="/safety">Seguridad</a> <!-- Ejemplo con región -->
+</nav>
+    <section>
+        <h2>Estadísticas de Detecciones</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Especie</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for class_name, count in detection_stats.items() %}
+                <tr>
+                    <td>{{ class_name }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h2>Distribución de Detecciones</h2>
+        <div class="chart-container" id="detectionChart"></div>
+
+        <h2>Curvas de Aprendizaje (LSTM)</h2>
+        <div class="gallery">
+            <img src="/static/img/lstm_learning_curve_choco.png" alt="Chocó" loading="lazy">
+            <img src="/static/img/lstm_learning_curve_valle_del_cauca.png" alt="Valle del Cauca" loading="lazy">
+            <img src="/static/img/lstm_learning_curve_atlantico.png" alt="Atlántico" loading="lazy">
+            <!-- Añade más imágenes para otras regiones según necesites -->
+        </div>
+
+        <h2>Boxplots de Energía de Olas</h2>
+        <div class="gallery">
+            <img src="/static/img/wave_energy_boxplot_choco.png" alt="Chocó" loading="lazy">
+            <img src="/static/img/wave_energy_boxplot_valle_del_cauca.png" alt="Valle del Cauca" loading="lazy">
+            <img src="/static/img/wave_energy_boxplot_atlantico.png" alt="Atlántico" loading="lazy">
+            <!-- Añade más imágenes para otras regiones según necesites -->
+        </div>
+
+        <h2>Mapas de Energía de Olas</h2>
+        <div class="gallery">
+            <img src="/static/img/wave_energy_map_choco.png" alt="Chocó" loading="lazy">
+            <img src="/static/img/wave_energy_map_valle_del_cauca.png" alt="Valle del Cauca" loading="lazy">
+            <img src="/static/img/wave_energy_map_atlantico.png" alt="Atlántico" loading="lazy">
+            <!-- Añade más imágenes para otras regiones según necesites -->
+        </div>
+
+        <h2>Mapas de Avistamientos de Ballenas</h2>
+        <div class="gallery">
+            <img src="/static/img/whale_sightings_map_choco.png" alt="Chocó" loading="lazy">
+            <img src="/static/img/whale_sightings_map_valle_del_cauca.png" alt="Valle del Cauca" loading="lazy">
+            <img src="/static/img/whale_sightings_map_atlantico.png" alt="Atlántico" loading="lazy">
+            <!-- Añade más imágenes para otras regiones según necesites -->
+        </div>
+    </section>
+    <footer>
+        <p>© 2025 Floating Ark. Todos los derechos reservados. Última actualización: {{ update_time }}</p>
+    </footer>
+    <script>
+        const detectionStats = {{ detection_stats|tojson }};
+        const labels = Object.keys(detectionStats);
+        const values = Object.values(detectionStats);
+
+        const data = [{
+            type: 'bar',
+            x: labels,
+            y: values,
+            marker: { color: 'rgb(158,202,225)' }
+        }];
+
+        const layout = {
+            title: 'Distribución de Detecciones por Especie',
+            xaxis: { title: 'Especies' },
+            yaxis: { title: 'Cantidad' }
+        };
+
+        Plotly.newPlot('detectionChart', data, layout);
+    </script>
+</body>
+</html>

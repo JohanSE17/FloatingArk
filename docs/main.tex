@@ -1,0 +1,72 @@
+\documentclass[conference]{IEEEtran}
+% Including necessary packages for formatting, graphics, tables, and math
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{hyperref}
+
+\title{Floating Ark: A Wave Energy System with Marine Fauna Detection and Safety Measures}
+\author{\IEEEauthorblockN{Anonymous Author}\IEEEauthorblockA{Anonymous Institution}}
+
+\begin{document}
+\maketitle
+
+% Abstract section
+\begin{abstract}
+This project develops a floating system for wave energy generation in Colombia, integrating real-time marine fauna detection, environmental safety measures, and sustainable energy solutions. Using YOLOv8, we achieved a mAP50 of 0.7521 for fauna detection. The system incorporates a hybrid undimotriz-hydraulic design and offshore wind energy, with contingency plans for disaster mitigation.
+\end{abstract}
+
+% Section 1: Introduction
+\section{Introduction}
+The Floating Ark project aims to harness wave energy in the Colombian Caribbean and Pacific regions while ensuring environmental sustainability and safety. Key regions like Nariño and Tumaco face challenges with rising sea levels, making floating systems a viable solution. The project integrates marine fauna detection, wave energy generation, and safety protocols to protect both human populations and marine ecosystems.
+
+% Section 2: Methodology
+\section{Methodology}
+We processed wave data to segment marine regions, trained a YOLOv8 model for fauna detection, and implemented a rule-based safety system. Two system models were designed: SMART villages for stable habitation and energy collection platforms with piezoelectric materials.
+
+% Section 3: Results
+\section{Results}
+\subsection{Fauna Detection}
+The YOLOv8 model, trained over 50 epochs, achieved a mAP50 of 0.7521 and mAP50-95 of 0.49425, as shown in Figure~\ref{fig:learning_curves}. Detection statistics are summarized in Table~\ref{tab:detections}.
+
+\begin{table}[h]
+\caption{Detection Statistics (Sample from Training Data)}
+\centering
+\begin{tabular}{lc}
+\toprule
+Species & Count \\
+\midrule
+Fish & 20 \\
+Shark & 10 \\
+Ballena & 2 \\
+\bottomrule
+\end{tabular}
+\label{tab:detections}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{img/learning_curves.png}
+\caption{Learning Curves of YOLOv8 Model}
+\label{fig:learning_curves}
+\end{figure}
+
+\subsection{Wave Energy Analysis}
+Wave energy potential in Nariño is moderate (0.2-0.4 on a normalized scale), as shown in Figure~\ref{fig:wave_energy_narino}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{img/wave_energy_boxplot_narino.png}
+\caption{Wave Energy Distribution - Nariño}
+\label{fig:wave_energy_narino}
+\end{figure}
+
+\subsection{Safety and Energy Integration}
+The system activates safety mode when wave height exceeds 3 meters or wind speed surpasses 15 m/s. Offshore wind energy is integrated in 69 areas in the Caribbean, each with a minimum capacity of 1GW.
+
+% Section 4: Discussion
+\section{Discussion}
+The Floating Ark system demonstrates feasibility for sustainable energy generation and marine conservation. However, challenges include model overfitting (validation losses increased slightly) and environmental impacts of offshore wind, requiring further studies with ANLA.
+
+\end{document}

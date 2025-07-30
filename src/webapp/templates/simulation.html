@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulación de Condiciones Marinas - Caribe Colombiano</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Simulación de Condiciones Marinas - {{ region.replace('_', ' ').title() }}</h1>
+    </header>
+
+    <nav>
+        <a href="{{ url_for('index') }}">Inicio</a>
+        <a href="{{ url_for('map') }}">Mapa Interactivo</a>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('recommendations') }}">Recomendaciones</a>
+        <a href="{{ url_for('segmentation') }}">Segmentación</a>
+        <a href="{{ url_for('detect') }}">Detección</a>
+        <a href="{{ url_for('simulation', region='choco') }}">Simulación Colombia</a>
+        <a href="{{ url_for('safety') }}">Seguridad</a>
+    </nav>
+
+    <section>
+        <h2>Gráfico de Simulación</h2>
+        <div id="plotly-chart"></div>
+        <script>
+            var graph = {{ graph_json | safe }};
+            Plotly.newPlot('plotly-chart', graph.data, graph.layout);
+        </script>
+    </section>
+
+    <footer>
+        <p>© 2025 Floating Ark. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

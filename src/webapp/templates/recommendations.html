@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recomendaciones por Región - Caribe Colombiano</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+    h2 {
+        margin-top: 30px;
+        color: #333;
+    }
+    #recommendations-chart {
+        margin-top: 20px;
+    }
+</style>
+    <header>
+        <h1>Recomendaciones por Región</h1>
+    </header>
+
+    <nav>
+        <a href="{{ url_for('index') }}">Inicio</a>
+        <a href="{{ url_for('map') }}">Mapa Interactivo</a>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('recommendations') }}">Recomendaciones</a>
+        <a href="{{ url_for('segmentation') }}">Segmentación</a>
+        <a href="{{ url_for('detect') }}">Detección</a>
+        <a href="{{ url_for('simulation', region='choco') }}">Simulación Colombia</a>
+        <a href="{{ url_for('safety') }}">Seguridad</a>
+    </nav>
+
+    <section>
+        {% if alerts %}
+    <div class="alerts">
+        <h3>Alertas de Desastres Naturales</h3>
+        <ul>
+            {% for alert in alerts %}
+                <li>{{ alert }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<h2>Condiciones y Prioridad por Región</h2>
+    <div id="recommendations-chart"></div>
+    <script>
+        const graphData = {{ graph_json | safe }};
+        Plotly.newPlot('recommendations-chart', graphData.data, graphData.layout);
+    </script>
+
+    <table>
+    <tr>
+        <th>Región</th>
+        <th>Altura de Ola (m)</th>
+        <th>Velocidad del Viento (m/s)</th>
+        <th>Presencia de Ballenas</th>
+        <th>Prioridad</th>
+        <th>Viabilidad Eólica Offshore</th>
+        <th>Alerta</th>
+    </tr>
+    {% for region, data in recommendations.items() %}
+    <tr>
+        <td>{{ region.replace('_', ' ').title() }}</td>
+        <td>{{ data.wave_height|round(2) }}</td>
+        <td>{{ data.wind_speed|round(2) }}</td>
+        <td>{{ data.whale_presence|round(4) }}</td>
+        <td>{{ data.priority }}</td>
+        <td>{{ data.offshore_viability }}</td>
+        <td>{{ data.alert }}</td>
+    </tr>
+    {% endfor %}
+</table>
+    </section>
+
+    <footer>
+        <p>© 2025 Floating Ark. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

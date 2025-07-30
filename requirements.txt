@@ -1,0 +1,14 @@
+ultralytics
+opencv-python-headless
+pytube
+flask
+flask-socketio
+torch
+torchvision
+psycopg2-binary
+python-dotenv
+plotly
+pandas
+numpy
+xarray
+netcdf4

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interactivo de Detecciones - Caribe Colombiano</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        .gallery img { width: 300px; margin: 10px; }
+        .windy-iframe { width: 100%; height: 400px; margin: 10px 0; }
+        select { padding: 5px; margin: 10px 0; }
+        iframe { width: 100%; height: 600px; border: none; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mapa Interactivo de Detecciones - Caribe Colombiano</h1>
+        <p>Visualiza las detecciones de fauna marina, condiciones y simulaciones en tiempo real</p>
+    </header>
+    <nav>
+        <a href="/">Inicio</a>
+        <a href="/map">Mapa Interactivo</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/recommendations">Recomendaciones</a>
+        <a href="/segmentation">Segmentación</a>
+        <a href="/detect">Detección</a>
+        <a href="/simulation/colombia">Simulación Colombia</a>
+        <a href="/safety">Seguridad</a>
+    </nav>
+    <section>
+        <h2>Buscador de Regiones</h2>
+        <select id="regionSelector" onchange="updateMap()">
+            <option value="">Selecciona una región</option>
+            {% for region, lat, lon in regions %}
+            <option value="{{ lat }},{{ lon }}">{{ region.replace('_', ' ').title() }}</option>
+            {% endfor %}
+        </select>
+
+        <h2>Mapas de Energía de Olas</h2>
+        <div class="gallery">
+            <img src="/static/img/wave_energy_map_choco.png" alt="Chocó" title="Energía de Olas - Chocó">
+            <img src="/static/img/wave_energy_map_valle_del_cauca.png" alt="Valle del Cauca" title="Energía de Olas - Valle del Cauca">
+        </div>
+
+        <h2>Mapas de Avistamientos de Ballenas</h2>
+        <div class="gallery">
+            <img src="/static/img/whale_sightings_map_choco.png" alt="Chocó" title="Avistamientos - Chocó">
+        </div>
+
+        <h2>Mapa de Detecciones y Condiciones (Folium)</h2>
+        <iframe src="/static/{{ map_file }}" class="folium-iframe"></iframe>
+
+        <h2>Mapa de Olas (Windy)</h2>
+        <iframe class="windy-iframe" src="https://embed.windy.com/embed2.html?lat=12.5&lon=-81.7&zoom=6&level=surface&overlay=wave&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=12.5&detailLon=-81.7&message=true" frameborder="0"></iframe>
+
+        <h2>Mapa de Viento (Windy)</h2>
+        <iframe class="windy-iframe" src="https://embed.windy.com/embed2.html?lat=12.5&lon=-81.7&zoom=6&level=surface&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=12.5&detailLon=-81.7&message=true" frameborder="0"></iframe>
+    </section>
+    <footer>
+        <p>© 2025 Floating Ark. Todos los derechos reservados. Última actualización: {{ update_time }}</p>
+    </footer>
+    <script>
+        function updateMap() {
+            const selector = document.getElementById('regionSelector');
+            const [lat, lon] = selector.value ? selector.value.split(',').map(Number) : [12.5, -81.7];
+            const zoom = selector.value ? 10 : 6;
+            const iframes = document.querySelectorAll('.windy-iframe');
+            iframes.forEach(iframe => {
+                const baseSrc = iframe.src.split('?')[0];
+                iframe.src = `${baseSrc}?lat=${lat}&lon=${lon}&zoom=${zoom}&level=surface&overlay=${iframe.src.includes('overlay=wave') ? 'wave' : 'wind'}&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lon}&message=true`;
+            });
+        }
+    </script>
+</body>
+</html>
